@@ -1,17 +1,20 @@
 const router = require("express").Router();
 const Post = require("../models/post");
+const auth = require("../middleware/auth");
 
 
-router.get('/', (req, res) => {
+router.get('/', auth, (req, res) => {
     Post.find({}, 'title description', function (error, posts) {
         if (error) {
             console.error(error);
         }
+
         res.send({
             posts: posts
         })
     }).sort({_id: -1})
 });
+
 
 router.post('/add', (req, res) => {
     const title = req.body.title;
@@ -44,6 +47,7 @@ router.put('/:id', (req, res) => {
             if (error) {
                 console.log(error)
             }
+
             res.send({
                 success: true
             })
@@ -55,8 +59,10 @@ router.delete('/:id', (req, res) => {
     Post.deleteOne({
         _id: req.params.id
     }, function (err, post) {
-        if (err)
-            res.send(err);
+        if (err) {
+            return res.send(err);
+        }
+
         res.send({
             success: true
         })
@@ -68,6 +74,7 @@ router.get('/:id', (req, res) => {
         if (error) {
             console.error(error);
         }
+
         res.send(post)
     })
 });
