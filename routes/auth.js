@@ -2,80 +2,50 @@ const router = require("express").Router();
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
 const error = require("../errors");
+const passport = require("passport");
 
 router.get("/logout", (req, res) => {
-    req.session.destroy((error) => {
-        if (error) {
-            console.log(error);
-            res.status(500);
-
-            return res.send({
-                success: false,
-            });
-        }
-
-        res.send({
-            success: true,
-        });
-    });
+    req.logout();
+    res.send({
+        success: true,
+    })
 });
 
-router.post("/login", async (req, res) => {
-    try {
-        const {email, password} = req.body;
-        const candidate = await User.findOne({email});
-
-        if (!candidate) {
-            res.status(404);
-
-            return res.send({
-                success: false,
-                message: error.USER_NOT_FOUND,
-            });
+router.post("/login", async (req, res, next) => {
+    passport.authenticate("local", (err, user, info) => {
+        if (err) {
+            console.error("[Auth /login]:", err);
         }
 
-        const isSame = await bcrypt.compare(password, candidate.password);
-        if (!isSame) {
-            res.status(500);
-
-            return res.send({
-                success: false,
-                message: error.USER_WRONG_PASSWORD,
-            });
-        }
-
-        req.session.user = candidate;
-        req.session.isAuthenticated = true;
-        req.session.save((err) => {
-            if (err) {
-                throw err;
+        req.login(user, (error) => {
+            if (error) {
+                return res.status(401).send({
+                    success: false,
+                    message: info.message,
+                });
             }
 
-            res.send({
-                success: true,
+            return res.send({
+                success: true
             })
         })
-    } catch (e) {
-        console.log(e);
-    }
+    })(req, res, next);
 });
 
 router.post("/register", async (req, res) => {
     try {
-        const {email, name, password} = req.body;
+        const {email, name, password, confirmPass} = req.body;
         const candidate = await User.findOne({email});
 
         if (candidate) {
-            res.status(500);
-            return res.send({
+            return res.status(500).send({
                 success: false,
                 message: error.USER_ALREADY_EXISTS,
             });
         }
 
-        if (password !== confirm) {
-            res.status(500);
-            return res.send({
+        if (password !== confirmPass) {
+            return res.status(500).send({
                 success: false,
                 message: error.PASSWORD_MISMATCH,
             });

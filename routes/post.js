@@ -1,9 +1,9 @@
 const router = require("express").Router();
 const Post = require("../models/post");
-const auth = require("../middleware/auth");
+const isAuth = require("../middleware/isAuth");
 
 
-router.get('/', auth, (req, res) => {
+router.get('/', isAuth, (req, res) => {
     Post.find({}, 'title description', function (error, posts) {
         if (error) {
             console.error(error);

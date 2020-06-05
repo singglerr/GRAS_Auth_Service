@@ -1,5 +1,7 @@
 const config = require("./config");
 const path = require("path");
+const userUtil = require("./utils/user");
+const User = require("./models/user");
 
 const express = require('express');
 const cors = require('cors');
@@ -7,21 +9,35 @@ const morgan = require('morgan');
 const mongoose = require("mongoose");
 const session = require("express-session");
 const MongoStore = require("connect-mongodb-session")(session);
-const csurf = require("csurf");
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
 
 const PostsRoutes = require("./routes/post");
 const AuthRoutes = require("./routes/auth");
 
-const varMiddleware = require("./middleware/variables");
-const userMiddleware = require("./middleware/user");
-
+// creation
 const app = express();
+
+passport.use(new LocalStrategy(
+    { usernameField: "email"},
+    userUtil.findToLogIn
+));
+
+passport.serializeUser((user, done) => {
+    done(null, user._id);
+});
+
+passport.deserializeUser(async (id, done) => {
+   const user =  await User.findById(id);
+   done(null, user || false);
+});
 
 const store = new MongoStore({
     collection: "session",
     uri: config.MONGO_URI,
 });
 
+// middleware
 app.use(express.static(path.join(__dirname, "_dist")));
 app.use(morgan('combined'));
 app.use(express.json());
@@ -32,10 +48,10 @@ app.use(session({
     store,
 }));
 app.use(cors());
-app.use(csurf());
-app.use(varMiddleware);
-app.use(userMiddleware);
+app.use(passport.initialize());
+app.use(passport.session());
 
+// routes
 app.use("/posts", PostsRoutes);
 app.use("/auth", AuthRoutes);
 
