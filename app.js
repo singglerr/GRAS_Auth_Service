@@ -11,6 +11,7 @@ const session = require("express-session");
 const MongoStore = require("connect-mongodb-session")(session);
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
+const uuid = require("uuid").v4;
 
 const PostsRoutes = require("./routes/post");
 const AuthRoutes = require("./routes/auth");
@@ -19,7 +20,7 @@ const AuthRoutes = require("./routes/auth");
 const app = express();
 
 passport.use(new LocalStrategy(
-    { usernameField: "email"},
+    {usernameField: "email"},
     userUtil.findToLogIn
 ));
 
@@ -28,8 +29,8 @@ passport.serializeUser((user, done) => {
 });
 
 passport.deserializeUser(async (id, done) => {
-   const user =  await User.findById(id);
-   done(null, user || false);
+    const user = await User.findById(id);
+    done(null, user || false);
 });
 
 const store = new MongoStore({
@@ -38,13 +39,21 @@ const store = new MongoStore({
 });
 
 // middleware
-app.use(express.static(path.join(__dirname, "_dist")));
+app.use(express.static(path.join(__dirname, "public")));
 app.use(morgan('combined'));
 app.use(express.json());
 app.use(session({
+    genid: (req) => {
+        return uuid();
+    },
     secret: config.SESSION_SECRET,
-    resave: false,
+    resave: true,
     saveUninitialized: false,
+    cookie: {
+        maxAge: 1000 * 60 * 60 * 24 * 7,
+        sameSite: false,
+        httpOnly: false,
+    },
     store,
 }));
 app.use(cors());
@@ -52,7 +61,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // routes
-app.use("/posts", PostsRoutes);
 app.use("/auth", AuthRoutes);
 
 async function start() {

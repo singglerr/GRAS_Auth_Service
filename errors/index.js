@@ -1,7 +1,7 @@
 module.exports = {
-    USER_NOT_FOUND: "user not found",
-    USER_INCORRECT_PASSWORD: "user incorrect password",
-    USER_ALREADY_EXISTS: "user already exists",
-    PASSWORD_MISMATCH: "password mismatch",
-    MISSING_CREDENTIALS: "missing credentials",
+    USER_NOT_FOUND: "User not found",
+    USER_INCORRECT_PASSWORD: "User incorrect password",
+    USER_ALREADY_EXISTS: "User already exists",
+    PASSWORD_MISMATCH: "Password mismatch",
+    MISSING_CREDENTIALS: "Missing credentials",
 };

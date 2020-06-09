@@ -11,22 +11,30 @@ router.get("/logout", (req, res) => {
     })
 });
 
+router.get("/loggedIn", (req, res) => {
+    res.send({
+        isLoggedIn: req.isAuthenticated(),
+    })
+})
+
 router.post("/login", async (req, res, next) => {
-    passport.authenticate("local", (err, user, info) => {
+    passport.authenticate("local", {
+        session: true,
+    }, (err, user, info) => {
         if (err) {
             console.error("[Auth /login]:", err);
         }
 
         req.login(user, (error) => {
             if (error) {
-                return res.status(401).send({
+                return res.send({
                     success: false,
                     message: info.message,
                 });
             }
 
             return res.send({
-                success: true
+                success: true,
             })
         })
     })(req, res, next);
@@ -42,7 +50,7 @@ router.post("/register", async (req, res) => {
             })
         }
 
-        const candidate = await User.findOne({email:email});
+        const candidate = await User.findOne({email: email});
 
         if (candidate) {
             return res.status(500).send({
