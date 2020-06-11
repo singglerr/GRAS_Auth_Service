@@ -15,7 +15,7 @@ router.get("/loggedIn", (req, res) => {
     res.send({
         isLoggedIn: req.isAuthenticated(),
     })
-})
+});
 
 router.post("/login", async (req, res, next) => {
     passport.authenticate("local", {

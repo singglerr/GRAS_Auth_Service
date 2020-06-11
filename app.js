@@ -13,8 +13,7 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const uuid = require("uuid").v4;
 
-const PostsRoutes = require("./routes/post");
-const AuthRoutes = require("./routes/auth");
+const APIRoutes = require("./routes");
 
 // creation
 const app = express();
@@ -61,7 +60,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // routes
-app.use("/auth", AuthRoutes);
+app.use("/api", APIRoutes);
 
 async function start() {
     try {
