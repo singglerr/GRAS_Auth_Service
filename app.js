@@ -60,7 +60,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // routes
-app.use("/api", APIRoutes);
+app.use("/", APIRoutes);
 
 async function start() {
     try {
