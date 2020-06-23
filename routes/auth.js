@@ -44,7 +44,7 @@ router.post("/register", async (req, res) => {
     try {
         const {email, name, password, passConfirm} = req.body;
         if (!email || !password || !passConfirm) {
-            return res.status(500).send({
+            return res.send({
                 success: false,
                 message: error.MISSING_CREDENTIALS,
             })
@@ -53,14 +53,14 @@ router.post("/register", async (req, res) => {
         const candidate = await User.findOne({email: email});
 
         if (candidate) {
-            return res.status(500).send({
+            return res.send({
                 success: false,
                 message: error.USER_ALREADY_EXISTS,
             });
         }
 
         if (password !== passConfirm) {
-            return res.status(500).send({
+            return res.send({
                 success: false,
                 message: error.PASSWORD_MISMATCH,
             });
